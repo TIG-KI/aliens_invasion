@@ -8,6 +8,7 @@ from game_stats import GameStats
 from button import Button
 from scoreboard import Scoreboard
 
+# pylint: disable=no-member
 def run_game():
     
     pygame.init()
@@ -16,7 +17,7 @@ def run_game():
     pygame.display.set_caption("Alien Invasion")
     
     #设置背景颜色
-    bg_color = (250, 250, 250)
+    #bg_color = (250, 250, 250)
 
     #创建一艘飞船
     ship = Ship(screen, ai_setting)

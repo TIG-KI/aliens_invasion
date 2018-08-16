@@ -28,6 +28,8 @@ class Settings():
 
         #以什么样的速度加快游戏节奏
         self.speedup_scale = 1.1
+
+        self.score_scale = 1.5
         
         self.initialize_dynamic_settings()
 
@@ -47,3 +49,6 @@ class Settings():
         self.bullet_speed_factor *= self.speedup_scale
         self.alien_speed_factor *= self.speedup_scale
         
+        #为了使点数为整数，所以使用 int（）函数
+        self.alien_point = int(self.alien_point * self.score_scale)
+        print(self.alien_point)

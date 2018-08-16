@@ -4,7 +4,9 @@ from bullet import Bullet
 from alien import Alien
 from time import sleep
 
+# pylint: disable=no-member
 def check_keydown_events(event, ai_setting, screen, ship, bullets, stats, aliens):
+    
 
     if event.key == pygame.K_RIGHT:
         ship.moving_right = True
@@ -137,8 +139,10 @@ def check_bullet_alien_collisions(bullets, aliens, ai_setting, screen, ship, sta
     #如果是这样，就删除相应的子弹和外星人
     collisions = pygame.sprite.groupcollide(bullets, aliens, True, True)
     if collisions:
-       stats.score += ai_setting.alien_point
-       sb.prep_score() 
+       for aliens in collisions.values():
+           stats.score += ai_setting.alien_point * len(aliens)
+           sb.prep_score()
+           check_high_score(stats, sb)
 
     #检查编组aliens是否为空，为空就调用create_fleet()
     if len(aliens) == 0:
@@ -225,5 +229,9 @@ def create_fleet(ai_setting, screen, ship, aliens):
     for row_number in range(number_rows):
         for alien_number in range(number_aliens_x):
             create_alien(ai_setting, screen, aliens, alien_number, row_number)
-        
-        
+
+def check_high_score(stats, sb):
+    """检查是否诞生了新的最高分"""
+    if stats.score > stats.high_score:
+        stats.high_score = stats.score
+        sb.prep_high_score()
