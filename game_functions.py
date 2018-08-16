@@ -48,7 +48,7 @@ def check_keyup_events(event, ship):
         ship.moving_left = False
 
 
-def check_events(ai_setting, screen, ship, bullets, stats, play_button, aliens):
+def check_events(ai_setting, screen, ship, bullets, stats, play_button, aliens, sb):
     #响应按键和鼠标事件
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -62,9 +62,9 @@ def check_events(ai_setting, screen, ship, bullets, stats, play_button, aliens):
 
         elif event.type == pygame.MOUSEBUTTONDOWN:
             mouse_x, mouse_y = pygame.mouse.get_pos()
-            check_play_button(ai_setting, stats, play_button, mouse_x, mouse_y, aliens, bullets, ship, screen)
+            check_play_button(ai_setting, stats, play_button, mouse_x, mouse_y, aliens, bullets, ship, screen, sb)
 
-def check_play_button(ai_setting, stats, play_button, mouse_x, mouse_y, aliens, bullets, ship, screen):
+def check_play_button(ai_setting, stats, play_button, mouse_x, mouse_y, aliens, bullets, ship, screen, sb):
     #在玩家单机play按钮时开始新游戏(只有点击了button区域并且当前stats.game_active 的值为false 时才能重新开始)
     button_clicked = play_button.rect.collidepoint(mouse_x, mouse_y)
     if button_clicked and  not stats.game_active:
@@ -77,6 +77,12 @@ def check_play_button(ai_setting, stats, play_button, mouse_x, mouse_y, aliens, 
         #重置游戏统计
         stats.reset_stats()
         stats.game_active = True
+
+        #重置记分牌图像
+        sb.prep_score()
+        sb.prep_high_score()
+        sb.prep_level()
+        sb.prep_ships()
 
         #清空外星人列表和子弹列表
         aliens.empty()
@@ -149,15 +155,21 @@ def check_bullet_alien_collisions(bullets, aliens, ai_setting, screen, ship, sta
         #删除现有的子弹并新建一批外星人
         bullets.empty()
         ai_setting.increase_speed()
+
+        #提高等级
+        stats.level += 1
+        sb.prep_level()
         create_fleet(ai_setting, screen, ship, aliens)
 
-def ship_hit(ai_setting, stats, screen, ship, aliens, bullets):
+def ship_hit(ai_setting, stats, screen, ship, aliens, bullets, sb):
     #响应被外星人撞到的飞船
 
     #检查飞的剩余数量如果大于零剩余数量减一 否则 game_active = False 游戏界面不再刷新
     if stats.ship_left > 0:
         #将ship_left减1
         stats.ship_left -= 1
+        #更新记分牌
+        sb.prep_ships()
     else:
         stats.game_active = False
         pygame.mouse.set_visible(True)
@@ -175,15 +187,16 @@ def ship_hit(ai_setting, stats, screen, ship, aliens, bullets):
 
     print(stats.ship_left)
 
-def check_aliens_bottom(ai_setting, stats, screen, ship, aliens, bullets):
+def check_aliens_bottom(ai_setting, stats, screen, ship, aliens, bullets, sb):
     #检查外星人是否到达了底端
     screen_rect = screen.get_rect()
     for alien in aliens.sprites():
         if alien.rect.bottom >= screen_rect.bottom:
             #像飞船被外星人被撞到了一样处理
-            ship_hit(ai_setting, stats, screen, ship, aliens, bullets)
+            ship_hit(ai_setting, stats, screen, ship, aliens, bullets, sb)
+            break
 
-def update_aliens(ai_setting, aliens, ship, bullets, stats, screen):
+def update_aliens(ai_setting, aliens, ship, bullets, stats, screen, sb):
     #更新外星人群中所有外星人的位置
     #检查是否有外星人位于屏幕边缘，并更新整群外星人的位置
     check_fleet_edges(ai_setting, aliens)
@@ -192,10 +205,10 @@ def update_aliens(ai_setting, aliens, ship, bullets, stats, screen):
     #检查飞船与外星人的碰撞(函数遍历整个aliens 编组并返回以一个与飞船发生碰撞的外星人，如果没有发生碰撞 函数将返回None)
     if pygame.sprite.spritecollideany(ship, aliens):
         #print("ship bit")
-        ship_hit(ai_setting, stats, screen, ship, aliens, bullets)
+        ship_hit(ai_setting, stats, screen, ship, aliens, bullets, sb)
 
     #检查外星人是否到达屏幕底部
-    check_aliens_bottom(ai_setting, stats, screen, ship, aliens, bullets)
+    check_aliens_bottom(ai_setting, stats, screen, ship, aliens, bullets, sb)
 
 def get_number_aliens_x(ai_setting, alien_width):
     #计算每行可容纳多少个外星人

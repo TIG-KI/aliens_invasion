@@ -44,12 +44,12 @@ def run_game():
     #开始游戏主循环
     while True:
 
-        gf.check_events(ai_setting, screen, ship, bullets, stats, play_button, aliens)
+        gf.check_events(ai_setting, screen, ship, bullets, stats, play_button, aliens, sb)
 
         if stats.game_active:
             ship.update()
             gf.update_bullets(bullets, aliens, ai_setting, screen, ship, stats, sb)
-            gf.update_aliens(ai_setting, aliens, ship, bullets, stats, screen)
+            gf.update_aliens(ai_setting, aliens, ship, bullets, stats, screen, sb)
             #print(len(bullets)), 打印屏幕上子弹的个数
         gf.update_screen(ai_setting, screen, ship, bullets, aliens, play_button, stats, sb)     
 
